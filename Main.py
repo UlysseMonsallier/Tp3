@@ -1,5 +1,6 @@
 import numpy as np
 import tkinter as tk
+import interface_graphique as ig
 
 # variables mouvement de la balle
 
@@ -17,6 +18,7 @@ def lancer(angle, vitesse):
         v[1] = vitesse * np.sin(angle)
         p = p + v * dt
         print(p)
+
         if np.any(p <= p_min) or np.any(p >= p_max):
             collision = True
             print("Collision détectée !")
