@@ -36,5 +36,6 @@ tk.canvas.pack()
 
 def dessiner_balle(x1,y1,r):
     tk.canvas.create_oval(x1-(r/2), y1-(r/2), x1+r, y1+r, fill="white", outline="black", width=2)
+    pool.mainloop()
 
 pool.mainloop()

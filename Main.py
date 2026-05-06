@@ -18,7 +18,7 @@ def lancer(angle, vitesse):
         v[1] = vitesse * np.sin(angle)
         p = p + v * dt
         print(p)
-
+        ig.dessiner_balle(p[0], p[1], r)
         if np.any(p <= p_min) or np.any(p >= p_max):
             collision = True
             print("Collision détectée !")
