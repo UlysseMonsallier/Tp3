@@ -39,7 +39,17 @@ def lancer(angle, vitesse):
             print("Collision détectée !")
             simulation = False
         
-    
+def pas_precedent():
+    pass
+
+def pas_suivant():
+    pass
+
+def position_finale():
+    pass
+
+def reinitialiser():
+    pass
 
 if __name__ == "__main__":
     ig.dessiner_balle(225, 225, r)
