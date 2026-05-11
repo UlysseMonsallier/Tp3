@@ -5,15 +5,24 @@ import Main
 pool = tk.Tk()
 pool.title("Jeu de billard")
 
-tk.Label(pool, text="entrez un angle de lancement" ).pack()
+conteneur = tk.Frame(pool)
+conteneur.pack(fill="both", expand=True)
 
-champ_angle = tk.Entry(pool, width=40)
-champ_angle.pack()
+cadre_textes = tk.Frame(conteneur)
+cadre_textes.pack(side="left", fill="y", padx=10, pady=10)
 
-tk.Label(pool, text="entrez une vitesse de lancement" ).pack()
+cadre_terrain = tk.Frame(conteneur)
+cadre_terrain.pack(side="right", fill="both", expand=True, padx=10, pady=10)
 
-champ_vitesse = tk.Entry(pool, width=40)
-champ_vitesse.pack()
+tk.Label(cadre_textes, text="entrez un angle de lancement").pack(anchor="w")
+
+champ_angle = tk.Entry(cadre_textes, width=40)
+champ_angle.pack(anchor="w")
+
+tk.Label(cadre_textes, text="entrez une vitesse de lancement").pack(anchor="w")
+
+champ_vitesse = tk.Entry(cadre_textes, width=40)
+champ_vitesse.pack(anchor="w")
 
 
     
@@ -28,14 +37,14 @@ def lancement():
         label_resultat_angle.config(text=f"Erreur : {e}")
 
 bouton_lancer = tk.Button(pool, text="Lancer", command=lancement)
-bouton_lancer.pack()
+bouton_lancer.pack(in_=cadre_textes, anchor="w", pady=(10, 0))
 label_resultat_angle = tk.Label(pool, text="Résultat : ")
-label_resultat_angle.pack()
+label_resultat_angle.pack(in_=cadre_textes, anchor="w")
 label_resultat_vitesse = tk.Label(pool, text="Résultat : ")
-label_resultat_vitesse.pack()
+label_resultat_vitesse.pack(in_=cadre_textes, anchor="w")
 
-canvas = tk.Canvas(pool, width=1000, height=500, bg="green")
-canvas.pack()
+canvas = tk.Canvas(cadre_terrain, width=1000, height=500, bg="green")
+canvas.pack(fill="both", expand=True)
 
 def dessiner_balle(x1,y1,r):
     canvas.delete("all")
