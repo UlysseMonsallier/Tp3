@@ -11,7 +11,7 @@ cofrot = 0.001
 
 p_min = np.array([r, r])
 p_max = np.array([1000 - r, 500 - r])
-simulation = False
+
 current_pas = 0
 def calculer_position(p, v):
     v[0] = v[0] * (1 - (cofrot * dt))
@@ -21,38 +21,53 @@ def calculer_position(p, v):
 
 liste = ListeChainee()
 def lancer(angle, vitesse):
-    global simulation
-    if simulation == False:
-        collision = False
+    collision = False
+    global pasActuel
+    pasActuel = None 
+    liste.__init__()  
     p = np.array([225, 225])
     v = np.array([0, 0])
-    liste = listeChainée.ListeChainee()
     v[0] = vitesse * np.cos(angle)
     v[1] = vitesse * np.sin(angle)
     while collision == False:
-        simulation = True
+        
         p, v = calculer_position(p, v)
-        current_pas += 1
         liste.append(p.copy())
         ig.dessiner_balle(p[0], p[1], r)
         if np.any(p <= p_min) or np.any(p >= p_max) or np.all(v == 0):
             collision = True
             print("Collision détectée !")
-            simulation = False
+            
+            ig.reset_buttons()
+            
 
+pasActuel = None
 def pas_suivant():
-    global current_pas
-    if current_pas >= 0 and current_pas < len(liste) - 1:
-        current_pas += 1
-    p, v = liste[current_pas]
+    global pasActuel
+    if pasActuel is None:
+        pasActuel = liste.tete
+    p = pasActuel.valeur
+    pasActuel = pasActuel.suivant
     ig.dessiner_balle(p[0], p[1], r)
 def pas_precedent():
-    global current_pas
-    if current_pas > 0:
-        current_pas -= 1
-    p, v = liste[current_pas]
-    ig.dessiner_balle(p[0], p[1], r)
+    global pasActuel
+    if pasActuel is None:
+        pasActuel = liste.tete
     
+    p = pasActuel.valeur
+    pasActuel = pasActuel.precedent
+    ig.dessiner_balle(p[0], p[1], r)
+def position_finale():
+    global pasActuel
+    pasActuel = liste.queue
+    p = pasActuel.valeur
+    ig.dessiner_balle(p[0], p[1], r)
+
+def reinitialiser():
+    global pasActuel
+    pasActuel = liste.tete
+    p = pasActuel.valeur
+    ig.dessiner_balle(p[0], p[1], r)
     
     
 
