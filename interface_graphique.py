@@ -27,7 +27,7 @@ champ_vitesse = tk.Entry(cadre_textes, width=30)
 champ_vitesse.grid(row=3, column=0, sticky="we", padx=5, pady=(0,8))
 
 # Champ friction
-tk.Label(cadre_textes, text="Coefficient de friction (μ)").grid(row=4, column=0, sticky="w", padx=5, pady=(2,2))
+tk.Label(cadre_textes, text="Coefficient de friction").grid(row=4, column=0, sticky="w", padx=5, pady=(2,2))
 champ_friction = tk.Entry(cadre_textes, width=30)
 champ_friction.insert(0, "1.0")
 champ_friction.grid(row=5, column=0, sticky="we", padx=5, pady=(0,8))
@@ -112,12 +112,10 @@ canvas.pack(fill="both", expand=True)
 
 def dessiner_balle(x1, y1, r):
     canvas.delete("all")
-    # Dessiner les bandes sur les 4 bords
     canvas.create_rectangle(0, 0, 10, 500, fill="brown", outline="black")  # gauche
     canvas.create_rectangle(990, 0, 1000, 500, fill="brown", outline="black")  # droit
     canvas.create_rectangle(0, 0, 1000, 10, fill="brown", outline="black")  # haut
     canvas.create_rectangle(0, 490, 1000, 500, fill="brown", outline="black")  # bas
-    # Dessiner la balle
     balle = canvas.create_oval(x1 - r/2, y1 - r/2, x1 + r/2, y1 + r/2, fill="white", outline="black", width=2)
     pool.update()
 

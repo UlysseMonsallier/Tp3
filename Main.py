@@ -14,7 +14,6 @@ epsilon = 0.5
 
 p_min = np.array([r, r])
 p_max = np.array([1000 - r, 500 - r])
-simulation = False
 
 liste = ListeChainee()
 pasActuel = None
@@ -54,10 +53,10 @@ def calculer_position(p, v, mu=None):
 
 
 def lancer(angle, vitesse, mu=None):
-    global simulation, pasActuel, liste
+    global pasActuel, liste
     if mu is None:
         mu = cofrot
-    collision = False
+    stop = False
     pasActuel = None
     liste.__init__()
 
@@ -66,8 +65,7 @@ def lancer(angle, vitesse, mu=None):
     v[0] = vitesse * np.cos(angle)
     v[1] = vitesse * np.sin(angle)
 
-    while collision == False:
-        simulation = True
+    while stop == False:
         p, v = calculer_position(p, v, mu)
 
         liste.append(p.copy())
@@ -75,9 +73,7 @@ def lancer(angle, vitesse, mu=None):
 
         vitesse_norm = np.linalg.norm(v)
         if vitesse_norm <= epsilon:
-            collision = True
-            print(f"Balle immobile! Position finale: ({p[0]:.1f}, {p[1]:.1f})")
-            simulation = False
+            stop = True
             ig.afficher_position_finale(p[0], p[1])
             ig.reset_buttons()
 
@@ -100,7 +96,6 @@ def pas_precedent():
     if pasActuel is None:
         pasActuel = liste.queue
     else:
-        # Parcourir la liste pour trouver le noeud précédent
         courant = liste.tete
         while courant and courant.suivant != pasActuel:
             courant = courant.suivant
