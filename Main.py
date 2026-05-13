@@ -1,25 +1,53 @@
+from logging import config
+
 import numpy as np
 import tkinter as tk
 import interface_graphique as ig
 import listeChainée
 from listeChainée import ListeChainee
-
-
+import json
 dt = 0.001
 r = 15
-cofrot = 0.001
+cofrot = 1.0
 L = 1000
 H = 500
-epsilon = 0.5
+vitesseMin = 0.5
+
+def OpenConfig(file):
+    with open(file, "r") as f:
+        
+        configfile = json.load(f)
+    try:
+        configfile["dimensions de la surface de jeu"]
+        configfile["rayon des balles"]
+        configfile["coefficient de frottement"]
+        configfile["position initiale des balles"]
+        configfile["vitesse minimum des balles"]
+        configfile["variation de temps"]
+    except KeyError as e:
+        print(f"Error: Missing configuration key - {e}")
+        exit(1)
+    try:
+        global dt, r, cofrot, L, H, vitesseMin
+        dt = float(configfile["variation de temps"])
+        r = int(configfile["rayon des balles"])
+        cofrot = float(configfile["coefficient de frottement"])
+        L = int(configfile["dimensions de la surface de jeu"][0])
+        H = int(configfile["dimensions de la surface de jeu"][1])
+        vitesseMin = float(configfile["vitesse minimum des balles"])
+    except ValueError as e:
+        print(f"Error: Invalid configuration value - {e}")
+        exit(1)
 
 p_min = np.array([r, r])
-p_max = np.array([1000 - r, 500 - r])
+p_max = np.array([L - r, H - r])
 
 liste = ListeChainee()
 pasActuel = None
 
 
 def detecter_et_rebondir(p, v):
+    global r, L, H
     if p[0] <= r:
         p[0] = r
         n = np.array([1.0, 0.0])
@@ -43,36 +71,36 @@ def detecter_et_rebondir(p, v):
     return p, v
 
 
-def calculer_position(p, v, mu=None):
-    if mu is None:
-        mu = cofrot
-    v = v * (1 - mu * dt)
+def calculer_position(p, v, frottement=None):
+    if frottement is None:
+        frottement = cofrot
+    v = v * (1 - frottement * dt)
     p, v = detecter_et_rebondir(p, v)
     p = p + (v * dt)
     return p, v
 
 
-def lancer(angle, vitesse, mu=None):
-    global pasActuel, liste
-    if mu is None:
-        mu = cofrot
+def lancer(angle, vitesse, frottement=None):
+    global pasActuel, liste, configfile
+    if frottement is None:
+        frottement = cofrot
     stop = False
     pasActuel = None
     liste.__init__()
 
-    p = np.array([225, 225])
+    p = np.array(configfile["position initiale des balles"][0])
     v = np.array([0, 0])
     v[0] = vitesse * np.cos(angle)
     v[1] = vitesse * np.sin(angle)
 
     while stop == False:
-        p, v = calculer_position(p, v, mu)
+        p, v = calculer_position(p, v, frottement)
 
         liste.append(p.copy())
         ig.dessiner_balle(p[0], p[1], r)
 
         vitesse_norm = np.linalg.norm(v)
-        if vitesse_norm <= epsilon:
+        if vitesse_norm <= vitesseMin:
             stop = True
             ig.afficher_position_finale(p[0], p[1])
             ig.reset_buttons()
@@ -123,5 +151,7 @@ def reinitialiser():
 
 
 if __name__ == "__main__":
-    ig.dessiner_balle(225, 225, r)
+    global configfile
+    
     ig.pool.mainloop()
+    ig.dessiner_balle(configfile["position initiale des balles"][0][0], configfile["position initiale des balles"][0][1], r)

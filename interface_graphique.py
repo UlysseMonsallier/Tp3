@@ -1,6 +1,7 @@
 import tkinter as tk
 import numpy as np
 import Main
+from tkinter import filedialog
 
 pool = tk.Tk()
 pool.title("Jeu de billard")
@@ -22,12 +23,16 @@ tk.Label(cadre_textes, text="Entrez un angle de lancement").grid(row=0, column=0
 champ_angle = tk.Entry(cadre_textes, width=30)
 champ_angle.grid(row=1, column=0, sticky="we", padx=5, pady=(0,8))
 
-tk.Label(cadre_textes, text="Entrez une vitesse de lancement").grid(row=2, column=0, sticky="w", padx=5, pady=(2,2))
+#config
+tk.Label(cadre_textes, text="Configuration(fichier JSON)").grid(row=2, column=0, sticky="w", padx=5, pady=(6,2))
+config = filedialog.askopenfilename(title="Sélectionnez le fichier de configuration", filetypes=[("Fichiers JSON", "*.json")])
+
+tk.Label(cadre_textes, text="Entrez une vitesse de lancement").grid(row=3, column=0, sticky="w", padx=5, pady=(2,2))
 champ_vitesse = tk.Entry(cadre_textes, width=30)
-champ_vitesse.grid(row=3, column=0, sticky="we", padx=5, pady=(0,8))
+champ_vitesse.grid(row=4, column=0, sticky="we", padx=5, pady=(0,8))
 
 # Champ friction
-tk.Label(cadre_textes, text="Coefficient de friction").grid(row=4, column=0, sticky="w", padx=5, pady=(2,2))
+tk.Label(cadre_textes, text="Coefficient de friction").grid(row=5, column=0, sticky="w", padx=5, pady=(2,2))
 champ_friction = tk.Entry(cadre_textes, width=30)
 champ_friction.insert(0, "1.0")
 champ_friction.grid(row=5, column=0, sticky="we", padx=5, pady=(0,8))
@@ -43,6 +48,7 @@ label_resultat_vitesse.pack(anchor="w")
 
 
 def lancement():
+    Main.OpenConfig(config)
     angle = champ_angle.get()
     vitesse = champ_vitesse.get()
     friction = champ_friction.get()
