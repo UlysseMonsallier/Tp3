@@ -12,6 +12,8 @@ cofrot = 1.0
 L = 1000
 H = 500
 vitesseMin = 0.5
+with open("FichierConfiguration.json", "r") as f:
+    configfile = json.load(f)
 
 def OpenConfig(file):
     with open(file, "r") as f:
@@ -24,6 +26,7 @@ def OpenConfig(file):
         configfile["position initiale des balles"]
         configfile["vitesse minimum des balles"]
         configfile["variation de temps"]
+        
     except KeyError as e:
         print(f"Error: Missing configuration key - {e}")
         exit(1)
@@ -35,9 +38,15 @@ def OpenConfig(file):
         L = int(configfile["dimensions de la surface de jeu"][0])
         H = int(configfile["dimensions de la surface de jeu"][1])
         vitesseMin = float(configfile["vitesse minimum des balles"])
+        
     except ValueError as e:
         print(f"Error: Invalid configuration value - {e}")
         exit(1)
+    finally:
+        ig.draw_canva(L,H)
+        ig.dessiner_balle(configfile["position initiale des balles"][0][0], configfile["position initiale des balles"][0][1], r)
+        ig.pool.mainloop()
+        print("Configuration loaded successfully.")
 
 p_min = np.array([r, r])
 p_max = np.array([L - r, H - r])
@@ -80,10 +89,9 @@ def calculer_position(p, v, frottement=None):
     return p, v
 
 
-def lancer(angle, vitesse, frottement=None):
-    global pasActuel, liste, configfile
-    if frottement is None:
-        frottement = cofrot
+def lancer(angle, vitesse):
+    global pasActuel, liste
+    frottement = cofrot
     stop = False
     pasActuel = None
     liste.__init__()
@@ -151,7 +159,4 @@ def reinitialiser():
 
 
 if __name__ == "__main__":
-    global configfile
-    
     ig.pool.mainloop()
-    ig.dessiner_balle(configfile["position initiale des balles"][0][0], configfile["position initiale des balles"][0][1], r)

@@ -6,13 +6,17 @@ from tkinter import filedialog
 pool = tk.Tk()
 pool.title("Jeu de billard")
 
+# Global variables for canvas dimensions
+terrain_width = 1000
+terrain_height = 500
+canvas = None
+
 conteneur = tk.Frame(pool)
 conteneur.pack(fill="both", expand=True)
 
 # Mise en page avec grid
-cadre_textes = tk.Frame(conteneur, width=300)
-cadre_textes.pack(side="left", fill="y", padx=10, pady=10)
-cadre_textes.grid_propagate(False)
+cadre_textes = tk.Frame(conteneur)
+cadre_textes.pack(side="left", fill="both", expand=False, padx=10, pady=10)
 cadre_textes.columnconfigure(0, weight=1)
 
 cadre_terrain = tk.Frame(conteneur)
@@ -25,21 +29,31 @@ champ_angle.grid(row=1, column=0, sticky="we", padx=5, pady=(0,8))
 
 #config
 tk.Label(cadre_textes, text="Configuration(fichier JSON)").grid(row=2, column=0, sticky="w", padx=5, pady=(6,2))
-config = filedialog.askopenfilename(title="Sélectionnez le fichier de configuration", filetypes=[("Fichiers JSON", "*.json")])
+config_label = tk.Label(cadre_textes, text="Aucun fichier sélectionné", fg="gray")
+config_label.grid(row=3, column=0, sticky="w", padx=5, pady=(0,2))
 
-tk.Label(cadre_textes, text="Entrez une vitesse de lancement").grid(row=3, column=0, sticky="w", padx=5, pady=(2,2))
+def select_config():
+    global config, canvas
+    config = filedialog.askopenfilename(title="Sélectionnez le fichier de configuration", filetypes=[("Fichiers JSON", "*.json")])
+    if config:
+        config_label.config(text=config.split("/")[-1], fg="black")
+        Main.OpenConfig(config)
+        # Recreate canvas with new dimensions
+        canvas.destroy()
+        draw_canva(Main.L, Main.H)
+        dessiner_balle(Main.configfile["position initiale des balles"][0][0], Main.configfile["position initiale des balles"][0][1], Main.r)
+
+bouton_config = tk.Button(cadre_textes, text="Sélectionner fichier", command=select_config)
+bouton_config.grid(row=3, column=0, sticky="we", padx=5, pady=(0,8))
+
+tk.Label(cadre_textes, text="Entrez une vitesse de lancement").grid(row=4, column=0, sticky="w", padx=5, pady=(2,2))
 champ_vitesse = tk.Entry(cadre_textes, width=30)
-champ_vitesse.grid(row=4, column=0, sticky="we", padx=5, pady=(0,8))
+champ_vitesse.grid(row=5, column=0, sticky="we", padx=5, pady=(0,8))
 
-# Champ friction
-tk.Label(cadre_textes, text="Coefficient de friction").grid(row=5, column=0, sticky="w", padx=5, pady=(2,2))
-champ_friction = tk.Entry(cadre_textes, width=30)
-champ_friction.insert(0, "1.0")
-champ_friction.grid(row=5, column=0, sticky="we", padx=5, pady=(0,8))
 
 # Labels de résultat
 result_frame = tk.Frame(cadre_textes)
-result_frame.grid(row=6, column=0, sticky="we", padx=5, pady=(0,8))
+result_frame.grid(row=7, column=0, sticky="we", padx=5, pady=(0,8))
 result_frame.columnconfigure(0, weight=1)
 label_resultat_angle = tk.Label(result_frame, text="Résultat : ")
 label_resultat_angle.pack(anchor="w")
@@ -48,10 +62,9 @@ label_resultat_vitesse.pack(anchor="w")
 
 
 def lancement():
-    Main.OpenConfig(config)
+    
     angle = champ_angle.get()
     vitesse = champ_vitesse.get()
-    friction = champ_friction.get()
     bouton_lancer.config(state="disabled")
     bouton_pas_prec.config(state="disabled")
     bouton_pas_suiv.config(state="disabled")
@@ -60,9 +73,9 @@ def lancement():
     try:
         angle = float(angle)
         vitesse = float(vitesse)
-        friction = float(friction)
+        
         label_resultat_angle.config(text="Simulation en cours...")
-        Main.lancer(np.radians(angle), vitesse, friction)
+        Main.lancer(np.radians(angle), vitesse)
     except ValueError as e:
         label_resultat_angle.config(text=f"Erreur : {e}")
 
@@ -87,7 +100,7 @@ def pas_suivant():
 
 # Boutons regroupés
 btn_frame = tk.Frame(cadre_textes)
-btn_frame.grid(row=7, column=0, sticky="we", padx=5, pady=(0,8))
+btn_frame.grid(row=8, column=0, sticky="we", padx=5, pady=(0,8))
 btn_frame.columnconfigure(0, weight=1)
 
 bouton_lancer = tk.Button(btn_frame, text="Lancer", command=lancement)
@@ -106,22 +119,26 @@ bouton_renitialiser = tk.Button(btn_frame, text="Réinitialiser", command=Main.r
 bouton_renitialiser.grid(row=4, column=0, sticky="we", pady=2)
 
 # Champ multiplicateur d'étapes
-tk.Label(cadre_textes, text="Multiplicateur d'étapes").grid(row=8, column=0, sticky="w", padx=5, pady=(2,2))
+tk.Label(cadre_textes, text="Multiplicateur d'étapes").grid(row=9, column=0, sticky="w", padx=5, pady=(2,2))
 champ_multi = tk.Entry(cadre_textes, width=30)
 champ_multi.insert(0, "1")
-champ_multi.grid(row=9, column=0, sticky="we", padx=5, pady=(0,8))
+champ_multi.grid(row=10, column=0, sticky="we", padx=5, pady=(0,8))
 
 # Canvas
-canvas = tk.Canvas(cadre_terrain, width=1000, height=500, bg="green")
-canvas.pack(fill="both", expand=True)
+def draw_canva(W,H):
+    global canvas, terrain_width, terrain_height
+    terrain_width = W
+    terrain_height = H
+    canvas = tk.Canvas(cadre_terrain, width=W, height=H, bg="green")
+    canvas.pack(fill="both", expand=True)
 
 
 def dessiner_balle(x1, y1, r):
     canvas.delete("all")
-    canvas.create_rectangle(0, 0, 10, 500, fill="brown", outline="black")  # gauche
-    canvas.create_rectangle(990, 0, 1000, 500, fill="brown", outline="black")  # droit
-    canvas.create_rectangle(0, 0, 1000, 10, fill="brown", outline="black")  # haut
-    canvas.create_rectangle(0, 490, 1000, 500, fill="brown", outline="black")  # bas
+    canvas.create_rectangle(0, 0, 10, terrain_height, fill="brown", outline="black")  # gauche
+    canvas.create_rectangle(terrain_width - 10, 0, terrain_width, terrain_height, fill="brown", outline="black")  # droit
+    canvas.create_rectangle(0, 0, terrain_width, 10, fill="brown", outline="black")  # haut
+    canvas.create_rectangle(0, terrain_height - 10, terrain_width, terrain_height, fill="brown", outline="black")  # bas
     balle = canvas.create_oval(x1 - r/2, y1 - r/2, x1 + r/2, y1 + r/2, fill="white", outline="black", width=2)
     pool.update()
 

@@ -1,0 +1,8 @@
+{
+    "dimensions de la surface de jeu": [500, 500],
+    "rayon des balles": 15,
+    "coefficient de frottement": 0.01,
+    "position initiale des balles": "[[250, 250]]",
+    "vitesse minimum des balles": "fejjf",
+    "variation de temps": 0.001
+}
