@@ -6,12 +6,14 @@ import interface_graphique as ig
 import listeChainée
 from listeChainée import ListeChainee
 import json
+#valeurs de configuration par défaut
 dt = 0.001
 r = 15
 cofrot = 1.0
 L = 1000
 H = 500
 vitesseMin = 0.5
+
 with open("FichierConfiguration.json", "r") as f:
     configfile = json.load(f)
 
@@ -28,8 +30,8 @@ def OpenConfig(file):
         configfile["variation de temps"]
         
     except KeyError as e:
-        print(f"Error: Missing configuration key - {e}")
-        exit(1)
+        ig.afficher_message_derreur(f"Clé manquante : {e}")
+        return
     try:
         global dt, r, cofrot, L, H, vitesseMin
         dt = float(configfile["variation de temps"])
@@ -38,15 +40,15 @@ def OpenConfig(file):
         L = int(configfile["dimensions de la surface de jeu"][0])
         H = int(configfile["dimensions de la surface de jeu"][1])
         vitesseMin = float(configfile["vitesse minimum des balles"])
+        if dt <= 0 or r <= 0 or cofrot < 0 or L <= 0 or H <= 0 or vitesseMin < 0:
+            raise ValueError("Les valeurs de configuration doivent être positives")
         
     except ValueError as e:
-        print(f"Error: Invalid configuration value - {e}")
-        exit(1)
+        ig.afficher_message_derreur(f"Valeur de configuration invalide : {e}")
+        return
     finally:
         ig.draw_canva(L,H)
         ig.dessiner_balle(configfile["position initiale des balles"][0][0], configfile["position initiale des balles"][0][1], r)
-        ig.pool.mainloop()
-        print("Configuration loaded successfully.")
 
 p_min = np.array([r, r])
 p_max = np.array([L - r, H - r])
@@ -158,5 +160,9 @@ def reinitialiser():
         ig.dessiner_balle(p[0], p[1], r)
 
 
+
+
 if __name__ == "__main__":
     ig.pool.mainloop()
+
+

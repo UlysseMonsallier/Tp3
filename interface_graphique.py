@@ -10,6 +10,7 @@ pool.title("Jeu de billard")
 terrain_width = 1000
 terrain_height = 500
 canvas = None
+configuration = None
 
 conteneur = tk.Frame(pool)
 conteneur.pack(fill="both", expand=True)
@@ -30,25 +31,35 @@ champ_angle.grid(row=1, column=0, sticky="we", padx=5, pady=(0,8))
 #config
 tk.Label(cadre_textes, text="Configuration(fichier JSON)").grid(row=2, column=0, sticky="w", padx=5, pady=(6,2))
 config_label = tk.Label(cadre_textes, text="Aucun fichier sélectionné", fg="gray")
-config_label.grid(row=3, column=0, sticky="w", padx=5, pady=(0,2))
+config_label.grid(row=4, column=0, sticky="w", padx=5, pady=(0,2))
+
+def afficher_message_derreur(message):
+    label_resultat_angle.config(text=f"Erreur : {message}")
+
+def reset_buttons():
+    bouton_lancer.config(state="normal")
+    bouton_pas_prec.config(state="normal")
+    bouton_pas_suiv.config(state="normal")
+    bouton_pos_finale.config(state="normal")
+    bouton_renitialiser.config(state="normal")
 
 def select_config():
-    global config, canvas
-    config = filedialog.askopenfilename(title="Sélectionnez le fichier de configuration", filetypes=[("Fichiers JSON", "*.json")])
-    if config:
-        config_label.config(text=config.split("/")[-1], fg="black")
-        Main.OpenConfig(config)
-        # Recreate canvas with new dimensions
-        canvas.destroy()
-        draw_canva(Main.L, Main.H)
-        dessiner_balle(Main.configfile["position initiale des balles"][0][0], Main.configfile["position initiale des balles"][0][1], Main.r)
+    global configuration, canvas
+    configuration = filedialog.askopenfilename(title="Sélectionnez le fichier de configuration", filetypes=[("Fichiers JSON", "*.json")])
+    if configuration:
+        config_label.config(text=configuration.split("/")[-1], fg="black")
+        Main.OpenConfig(configuration)
+        reset_buttons()
+        bouton_config.config(state="disabled")
+    else:
+        afficher_message_derreur("Aucun fichier de configuration sélectionné")
 
 bouton_config = tk.Button(cadre_textes, text="Sélectionner fichier", command=select_config)
-bouton_config.grid(row=3, column=0, sticky="we", padx=5, pady=(0,8))
+bouton_config.grid(row=5, column=0, sticky="we", padx=5, pady=(0,8))
 
-tk.Label(cadre_textes, text="Entrez une vitesse de lancement").grid(row=4, column=0, sticky="w", padx=5, pady=(2,2))
+tk.Label(cadre_textes, text="Entrez une vitesse de lancement").grid(row=2, column=0, sticky="w", padx=5, pady=(2,2))
 champ_vitesse = tk.Entry(cadre_textes, width=30)
-champ_vitesse.grid(row=5, column=0, sticky="we", padx=5, pady=(0,8))
+champ_vitesse.grid(row=3, column=0, sticky="we", padx=5, pady=(0,8))
 
 
 # Labels de résultat
@@ -59,6 +70,8 @@ label_resultat_angle = tk.Label(result_frame, text="Résultat : ")
 label_resultat_angle.pack(anchor="w")
 label_resultat_vitesse = tk.Label(result_frame, text="Résultat : ")
 label_resultat_vitesse.pack(anchor="w")
+
+
 
 
 def lancement():
@@ -78,14 +91,6 @@ def lancement():
         Main.lancer(np.radians(angle), vitesse)
     except ValueError as e:
         label_resultat_angle.config(text=f"Erreur : {e}")
-
-
-def reset_buttons():
-    bouton_lancer.config(state="normal")
-    bouton_pas_prec.config(state="normal")
-    bouton_pas_suiv.config(state="normal")
-    bouton_pos_finale.config(state="normal")
-    bouton_renitialiser.config(state="normal")
 
 
 def pas_precedent():
@@ -118,11 +123,19 @@ bouton_pos_finale.grid(row=3, column=0, sticky="we", pady=2)
 bouton_renitialiser = tk.Button(btn_frame, text="Réinitialiser", command=Main.reinitialiser)
 bouton_renitialiser.grid(row=4, column=0, sticky="we", pady=2)
 
+
 # Champ multiplicateur d'étapes
 tk.Label(cadre_textes, text="Multiplicateur d'étapes").grid(row=9, column=0, sticky="w", padx=5, pady=(2,2))
 champ_multi = tk.Entry(cadre_textes, width=30)
 champ_multi.insert(0, "1")
 champ_multi.grid(row=10, column=0, sticky="we", padx=5, pady=(0,8))
+
+# Désactiver boutons 
+bouton_lancer.config(state="disabled")
+bouton_pas_prec.config(state="disabled")
+bouton_pas_suiv.config(state="disabled")
+bouton_pos_finale.config(state="disabled")
+bouton_renitialiser.config(state="disabled")
 
 # Canvas
 def draw_canva(W,H):
@@ -146,7 +159,6 @@ def dessiner_balle(x1, y1, r):
 def afficher_position_finale(x, y):
     """Afficher la position où la balle s'est arrêtée"""
     label_resultat_vitesse.config(text=f"Position finale: ({x:.1f}, {y:.1f})")
-
 
 if __name__ == "__main__":
     pool.mainloop()
